@@ -2,12 +2,12 @@ import jinja2
 import matplotlib
 import matplotlib.pyplot as plt
 import os
-import pprint
+from pprint import PrettyPrinter
 import pytz
 import requests
 import sqlite3
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, send_file
 from geopy.geocoders import Nominatim
@@ -25,6 +25,14 @@ app = Flask(__name__)
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
 
+#Make a PrettyPrinter object
+pp = PrettyPrinter(indent=4)
+
+#Get today's date
+today = date.today()
+
+#make textual day, month, year
+date_today = today.strftime("%B %d, %Y")
 
 # Settings for image endpoint
 # Written with help from http://dataviztalk.blogspot.com/2016/01/serving-matplotlib-plot-that-follows.html
@@ -58,39 +66,33 @@ def get_letter_for_units(units):
 @app.route('/results')
 def results():
     """Displays results for current weather conditions."""
-    # TODO: Use 'request.args' to retrieve the city & units from the query
-    # parameters.
-    city = ''
-    units = ''
+
+    city = request.args.get('city')
+    units = request.args.get('units')
 
     url = 'http://api.openweathermap.org/data/2.5/weather'
     params = {
-        # TODO: Enter query parameters here for the 'appid' (your api key),
-        # the city, and the units (metric or imperial).
-        # See the documentation here: https://openweathermap.org/current
-
+        "q": city,
+        "appid": API_KEY,
+        "units": units
     }
 
     result_json = requests.get(url, params=params).json()
 
-    # Uncomment the line below to see the results of the API call!
-    # pp.pprint(result_json)
+    pp.pprint(result_json)
 
-    # TODO: Replace the empty variables below with their appropriate values.
-    # You'll need to retrieve these from the result_json object above.
+    weather = result_json.get('weather')
 
-    # For the sunrise & sunset variables, I would recommend to turn them into
-    # datetime objects. You can do so using the `datetime.fromtimestamp()` 
-    # function.
+
     context = {
         'date': datetime.now(),
-        'city': '',
-        'description': '',
-        'temp': '',
-        'humidity': '',
-        'wind_speed': '',
-        'sunrise': '',
-        'sunset': '',
+        'city': result_json['name'],
+        'description': weather[0]['description'],
+        'temp': result_json['main']['temp'],
+        'humidity': result_json['main']['humidity'],
+        'wind_speed': result_json['wind']['speed'],
+        'sunrise': datetime.fromtimestamp(result_json['sys']['sunrise']),
+        'sunset': datetime.fromtimestamp(result_json['sys']['sunrise']),
         'units_letter': get_letter_for_units(units)
     }
 
@@ -98,9 +100,13 @@ def results():
 
 def get_min_temp(results):
     """Returns the minimum temp for the given hourly weather objects."""
-    # TODO: Fill in this function to return the minimum temperature from the
-    # hourly weather data.
-    pass
+
+    context = {
+        'min_temp': result_json['main']['temp_min']
+    }
+
+    return render_template('results.html', **context)
+
 
 def get_max_temp(results):
     """Returns the maximum temp for the given hourly weather objects."""
@@ -135,7 +141,7 @@ def historical_results():
         # latitude, longitude, units, & date (in seconds).
         # See the documentation here (scroll down to "Historical weather data"):
         # https://openweathermap.org/api/one-call-api
-        
+
     }
 
     result_json = requests.get(url, params=params).json()
