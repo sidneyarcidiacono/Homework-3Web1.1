@@ -7,7 +7,7 @@
         server.
     #}
     <h1>Weather in {{ city }}</h1>
-    <p>on {{ date_today }}</p>
+    <p>on {{ dt }}</p>
 
 
     {#
@@ -15,19 +15,14 @@
         Replace 'F' with the appropriate units.
     #}
     <ul>
-        <li>Description: </li>
-        <li>Temperature: ° F</li>
-        <li>Min: ° F</li>
-        <li>Max: ° F</li>
+        <li>Description: {{ description }}</li>
+        <li>Temperature: {{ temp }}° {{ units_letter }}</li>
+        <li>Min: {{ min_temp }}° {{ units_letter }} </li>
+        <li>Max: {{ max_temp }}° {{ units_letter }}</li>
     </ul>
 
 
-    {#
-        TODO: Uncomment the following image tag to display a graph of the
-        temperature over time.
-    #}
-
-    {# <img src="/graph/{{ lat }}/{{ lon }}/{{ units }}/{{ date.strftime('%Y-%m-%d') }}"> #}
+   <img src="/graph/{{ lat }}/{{ lon }}/{{ units }}/{{ date.strftime('%Y-%m-%d') }}">
 
 </section>
 
