@@ -1,5 +1,5 @@
 body {
-    background-color: #e6faff;
+    background-image: url('./assets/sunny_day.jpg');
     display: flex;
     justify-content: center;
     font-family: "Roboto", sans-serif;
@@ -10,7 +10,7 @@ main {
 }
 
 main > section {
-    background-color: #fff;
+    background-color: #C1CDCD;
     border: 1px solid #007a99;
     box-shadow: 5px 5px 5px #999;
     padding: 20px;

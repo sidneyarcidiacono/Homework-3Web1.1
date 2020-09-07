@@ -2,18 +2,14 @@
 {% block content %}
 
 <section class="weather-form">
-    {#
-        TODO: Replace the hard-coded city and date below with data from the
-        server.
-    #}
+
     <h1>Weather in {{ city }}</h1>
-    <p>on {{ dt }}</p>
+    <p>on {{ date.strftime('%B %d, %Y') }}</p>
 
+    <div>
+      <img src="http://openweathermap.org/img/wn/{{ icon }}@2x.png">
+    </div>
 
-    {#
-        TODO: Add the temperature, description, and min & max temperature below.
-        Replace 'F' with the appropriate units.
-    #}
     <ul>
         <li>Description: {{ description }}</li>
         <li>Temperature: {{ temp }}° {{ units_letter }}</li>

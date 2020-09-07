@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="weather-form">
+
+    <h1>Weather in {{ city }}</h1>
+    <p>on {{ date.strftime('%B %d, %Y') }}</p>
+
+    <div>
+      <img src="http://openweathermap.org/img/wn/{{ icon }}@2x.png">
+    </div>
+
+    <ul>
+        <li>Description: {{ description }}</li>
+        <li>Temperature: {{ temp }}° {{ units_letter }}</li>
+        <li>Min: {{ min_temp }}° {{ units_letter }} </li>
+        <li>Max: {{ max_temp }}° {{ units_letter }}</li>
+    </ul>
+
+</section>
+
+{% endblock %}
