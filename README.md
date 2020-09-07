@@ -1,3 +1,3 @@
 # Homework 3: Weather API
 
-Instructions go here
+A basic weather app that provides historical weather data, the current day's weather, and a five day forecast. 
