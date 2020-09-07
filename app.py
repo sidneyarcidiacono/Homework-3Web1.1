@@ -74,8 +74,12 @@ def error_page(e):
 def results():
     """Displays results for current weather conditions."""
     city = request.args.get('city')
+    weather_app.set_city(city)
     state = request.args.get('state')
+    weather_app.set_state(state)
     units = request.args.get('units')
+    weather_app.set_units(units)
+
     url = weather_app.url
     lat, lon = weather_app.get_lat_lon(city)
 
@@ -83,57 +87,31 @@ def results():
         'appid': API_KEY,
         'lat': lat,
         'lon': lon,
-        'units': units,
-        'dt': weather_app.date_in_seconds,
+        'units': weather_app._units,
+        'dt': weather_app._date_in_seconds,
         'exclude': 'hourly'
     }
 
-#TODO: See if you can make below variables a reusable function in weather.py
     result_json = requests.get(url, params=params).json()
-    current_result = result_json['current']
+    weather_app.set_current_hourly_result(result_json)
 
     pp.pprint(result_json)
 
-    # weather = result_json.get('weather')
-
     context = {
-        'date': weather_app.date_today,
-        'city': city,
-        'state': state,
-        'description': current_result['weather'][0]['description'],
-        'icon': current_result['weather'][0]['icon'],
-        'temp': current_result['temp'],
-        'humidity': current_result['humidity'],
-        'wind_speed': current_result['wind_speed'],
-        'sunrise': datetime.fromtimestamp(current_result['sunrise']),
-        'sunset': datetime.fromtimestamp(current_result['sunrise']),
+        'date': weather_app.date_obj,
+        'city': weather_app._city,
+        'state': weather_app._state,
+        'description': weather_app._result_current['weather'][0]['description'],
+        'icon': weather_app._result_current['weather'][0]['icon'],
+        'temp': weather_app._result_current['temp'],
+        'humidity': weather_app._result_current['humidity'],
+        'wind_speed': weather_app._result_current['wind_speed'],
+        'sunrise': datetime.fromtimestamp(weather_app._result_current['sunrise']),
+        'sunset': datetime.fromtimestamp(weather_app._result_current['sunrise']),
         'units_letter': weather_app.get_letter_for_units(units)
     }
 
     return render_template('results.html', **context)
-
-
-#Functions to return values for below routes
-
-def get_min_temp(results):
-    """Returns the minimum temp for the given hourly weather objects."""
-    temps = []
-    for i in results:
-        temp = i['temp']
-        temps.append(temp)
-    min_temp = min(temps)
-    return min_temp
-
-
-def get_max_temp(results):
-    """Returns the maximum temp for the given hourly weather objects."""
-    temps = []
-    for i in results:
-        temp = i['temp']
-        temps.append(temp)
-    max_temp = max(temps)
-    return max_temp
-
 
 
 @app.route('/historical_results')
@@ -141,10 +119,13 @@ def historical_results():
     """Displays historical weather forecast for a given day."""
 
     city = request.args.get('city')
+    weather_app.set_city(city)
+    state = request.args.get('state')
+    weather_app.set_state(state)
     date = request.args.get('date')
+    weather_app.set_date(date)
     units = request.args.get('units')
-    date_obj = datetime.strptime(date, '%m-%d-%Y')
-    date_in_seconds = date_obj.strftime('%s')
+    weather_app.set_units(units)
 
     latitude, longitude = weather_app.get_lat_lon(city)
     url = weather_app.url
@@ -153,29 +134,29 @@ def historical_results():
         'appid': API_KEY,
         'lat': latitude,
         'lon': longitude,
-        'units': units,
-        'dt': date_in_seconds
+        'units': weather_app._units,
+        'dt': weather_app._date_in_seconds
     }
 
     result_json = requests.get(url, params=params).json()
 
     pp.pprint(result_json)
 
-    result_current = result_json['current']
-    result_hourly = result_json['hourly']
+    weather_app.set_current_hourly_result(result_json)
 
     context = {
-        'city': city,
-        'date': date_obj,
+        'city': weather_app._city,
+        'state': weather_app._state,
+        'date': weather_app.date_obj,
         'lat': latitude,
         'lon': longitude,
-        'units': units,
+        'units': weather_app._units,
         'units_letter': weather_app.get_letter_for_units(units), # should be 'C', 'F', or 'K'
-        'description': result_current['weather'][0]['description'],
-        'temp': result_current['temp'],
-        'min_temp': get_min_temp(result_hourly),
-        'max_temp': get_max_temp(result_hourly),
-        'icon': result_current['weather'][0]['icon']
+        'description': weather_app._result_current['weather'][0]['description'],
+        'temp': weather_app._result_current['temp'],
+        'min_temp': weather_app.get_min_temp(weather_app._result_hourly),
+        'max_temp': weather_app.get_max_temp(weather_app._result_hourly),
+        'icon': weather_app._result_current['weather'][0]['icon']
     }
 
     return render_template('historical_results.html', **context)
@@ -186,41 +167,45 @@ def forecast_results():
     """Displays future weather forecast for a given day."""
 
     city = request.args.get('city')
+    weather_app.set_city(city)
+    state = request.args.get('state')
+    weather_app.set_state(state)
     date = request.args.get('date')
+    weather_app.set_date(date)
     units = request.args.get('units')
-    date_obj = datetime.strptime(date, '%m-%d-%Y')
-    date_in_seconds = date_obj.strftime('%s')
+    weather_app.set_units(units)
+
 
     latitude, longitude = weather_app.get_lat_lon(city)
-
     url = weather_app.url
+
     params = {
         'appid': API_KEY,
         'lat': latitude,
         'lon': longitude,
-        'units': units,
-        'dt': date_in_seconds
+        'units': weather_app._units,
+        'dt': weather_app._date_in_seconds
     }
 
     result_json = requests.get(url, params=params).json()
 
     pp.pprint(result_json)
 
-    result_hourly = result_json['hourly']
-    result_current = result_json['current']
+    weather_app.set_current_hourly_result(result_json)
 
     context = {
-        'city': city,
-        'date': date_obj,
+        'city': weather_app._city,
+        'state': weather_app._state,
+        'date': weather_app.date_obj,
         'lat': latitude,
         'lon': longitude,
-        'units': units,
+        'units': weather_app._units,
         'units_letter': weather_app.get_letter_for_units(units), # should be 'C', 'F', or 'K'
-        'description': result_current['weather'][0]['description'],
-        'temp': result_current['temp'],
-        'min_temp': get_min_temp(result_hourly),
-        'max_temp': get_max_temp(result_hourly),
-        'icon': result_current['weather'][0]['icon']
+        'description': weather_app._result_current['weather'][0]['description'],
+        'temp': weather_app._result_current['temp'],
+        'min_temp': weather_app.get_min_temp(weather_app._result_hourly),
+        'max_temp': weather_app.get_max_temp(weather_app._result_hourly),
+        'icon': weather_app._result_current['weather'][0]['icon']
     }
 
     return render_template('forecast_results.html', **context)
@@ -276,7 +261,7 @@ def graph(lat, lon, units, date):
         hours,
         temps,
         'Hour',
-        f'Temperature ({get_letter_for_units(units)})'
+        f'Temperature ({weather_app.get_letter_for_units(units)})'
     )
     return image
 
