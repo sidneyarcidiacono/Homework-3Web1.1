@@ -156,7 +156,8 @@ def historical_results():
         'temp': weather_app._result_current['temp'],
         'min_temp': weather_app.get_min_temp(weather_app._result_hourly),
         'max_temp': weather_app.get_max_temp(weather_app._result_hourly),
-        'icon': weather_app._result_current['weather'][0]['icon']
+        'icon': weather_app._result_current['weather'][0]['icon'],
+        'result_hourly': result_json['hourly']
     }
 
     return render_template('historical_results.html', **context)
