@@ -82,7 +82,8 @@
 
             <p>
                 <label>
-                    Please choose the date you'd like info on (within the past five days): <br>
+                    Please choose the date you'd like info on </br>
+                    (please enter in format mm-dd-yyyy): </br>
 
                     <input type="date" name="date" min="{{ min_date.strftime('%Y-%m-%d') }}" max="{{ max_date.strftime('%Y-%m-%d') }}">
                 </label>
@@ -111,7 +112,7 @@
                 <label>
                     Please enter your state: <br>
                     <input type="text" name="state">
-                </label> 
+                </label>
             </p>
 
             <p>
@@ -132,7 +133,8 @@
 
             <p>
                 <label>
-                    Please choose the date you'd like info on (up to four days ahead): <br>
+                    Please choose the date you'd like info on </br>
+                    (please enter in format mm-dd-yyyy): </br>
 
                     <input type="date" name="date" min="{{ min_date.strftime('%Y-%m-%d') }}" max="{{ max_date.strftime('%Y-%m-%d') }}">
                 </label>
