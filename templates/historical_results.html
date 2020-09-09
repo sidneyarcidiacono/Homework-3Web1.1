@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 {% block head %}
 
-<script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
-<script type="text/javascript" src="/static/graph.js" defer></script>
+<script src="static/graph.js" type="text/javascript" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 
 {% endblock %}
 
 
 {% block content %}
+
 
 <section class="weather-form">
 
@@ -25,12 +26,11 @@
         <li>Max: {{ max_temp }}° {{ units_letter }}</li>
     </ul>
 
-    <div class="hidden" id="json">{{ result_hourly }}</div>
-
+    <div>
+      <canvas id="myChart" width="400" height="400"></canvas>
+    </div>
 
    <!-- <img src="/graph/{{ lat }}/{{ lon }}/{{ units }}/{{ date.strftime('%Y-%m-%d') }}"> -->
-
-   <div id="container" class="svg-container"></div>
 
 </section>
 

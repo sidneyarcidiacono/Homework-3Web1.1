@@ -144,6 +144,26 @@ def historical_results():
 
     weather_app.set_current_hourly_result(result_json)
 
+    def write_hourly_results():
+        """Write hourly results to data.txt."""
+        time_list = []
+        temp_list = []
+
+        for hour in weather_app._result_hourly:
+            time = datetime.fromtimestamp(hour['dt']).strftime('%-I:%M %p')
+            time_list.append(time)
+            temp = hour['temp']
+            temp_list.append(temp)
+        try:
+            filename = "static/data.txt"
+            f = open(filename, 'w')
+            f.write(f"{time_list}\n{temp_list}\n")
+            f.close()
+        except:
+            pass
+
+    write_hourly_results()
+
     context = {
         'city': weather_app._city,
         'state': weather_app._state,

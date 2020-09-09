@@ -1,135 +1,51 @@
-const width = 960
-const height = 500
-const margin = 5
-const padding = 5
-const adj = 30
-// we are appending SVG first
-const svg = d3.select('div#container').append('svg')
-    .attr('preserveAspectRatio', 'xMinYMin meet')
-    .attr('viewBox', '-'
-          + adj + ' -'
-          + adj + ' '
-          + (width + adj * 3) + ' '
-          + (height + adj * 3))
-    .style('padding', padding)
-    .style('margin', margin)
-    .classed('svg-content', true)
+let timeArray
+let tempArray
 
-// -----------------------------DATA-----------------------------//
-
-const resultsJSON = document.getElementById('json').innerHTML
-const prettyResults = resultsJSON.replace(/'/g,'"')
-const weatherObj = JSON.parse(prettyResults)
-console.log(weatherObj)
-
-const tempList = []
-
-for (const object in weatherObj) {
-  tempList.push(weatherObj[object].temp)
+async function fetchText () {
+  let response = await fetch('static/data.txt')
+  let data = await response.text()
+  let dataArray = data.split('\n')
+  timeArray = dataArray[0].substring(1, dataArray[0].length - 2).split(', ')
+  tempArray = dataArray[1].substring(1, dataArray[1].length - 2).split(', ').map(Number)
+  console.log(timeArray, tempArray)
 }
 
-// let csvContent = "data:text/csv;charset=utf-8,"
-//
-// tempList.forEach(function(rowArray) {
-//     let row = rowArray.join(",");
-//     csvContent += row + "\r\n";
-// });
+fetchText()
 
-const encodedUri = encodeURI(csvContent)
-const link = document.createElement("a")
-link.setAttribute("href", encodedUri)
-link.setAttribute("download", "my_data.csv")
-document.body.appendChild(link)
-
-link.click()
-
-
-const timeConv = d3.timeParse('%d-%b-%Y')
-const dataset = d3.json(prettyResults)
-console.log(dataset)
-dataset.then(function (data) {
-  var slices = data.columns.slice(1).map(function (id) {
-    return {
-      id: id,
-      values: data.map(function (d) {
-        return {
-          date: timeConv(d.date),
-          measurement: +d[id]
+const ctx = document.getElementById('myChart').getContext('2d');
+const myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [...timeArray],
+        datasets: [{
+            label: 'Temperature',
+            data: tempArray,
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
         }
-      })
     }
-  })
-
-// ----------------------------SCALES----------------------------//
-  const xScale = d3.scaleTime().range([0, width])
-  const yScale = d3.scaleLinear().rangeRound([height, 0])
-  xScale.domain(d3.extent(data, function (d) {
-    return timeConv(d.date)
-  }))
-  yScale.domain([(0), d3.max(slices, function (c) {
-    return d3.max(c.values, function (d) {
-      return d.measurement + 4
-    })
-  })
-  ])
-
-// -----------------------------AXES-----------------------------//
-  const yaxis = d3.axisLeft()
-    .ticks((slices[0].values).length)
-    .scale(yScale)
-
-  const xaxis = d3.axisBottom()
-    .ticks(d3.timeDay.every(1))
-    .tickFormat(d3.timeFormat('%b %d'))
-    .scale(xScale)
-
-// ----------------------------LINES-----------------------------//
-  const line = d3.line()
-    .x(function (d) { return xScale(d.date) })
-    .y(function (d) { return yScale(d.measurement) })
-
-  let id = 0
-  const ids = function () {
-    return 'line-' + id++
-  }
-// -------------------------2. DRAWING---------------------------//
-// -----------------------------AXES-----------------------------//
-  svg.append('g')
-    .attr('class', 'axis')
-    .attr('transform', 'translate(0,' + height + ')')
-    .call(xaxis)
-
-  svg.append('g')
-    .attr('class', 'axis')
-    .call(yaxis)
-    .append('text')
-    .attr('transform', 'rotate(-90)')
-    .attr('dy', '.75em')
-    .attr('y', 6)
-    .style('text-anchor', 'end')
-    .text('Frequency')
-
-// ----------------------------LINES-----------------------------//
-  const lines = svg.selectAll('lines')
-    .data(slices)
-    .enter()
-    .append('g')
-
-  lines.append('path')
-    .attr('class', ids)
-    .attr('d', function (d) { return line(d.values) })
-
-  lines.append('text')
-    .attr('class', 'serie_label')
-    .datum(function (d) {
-      return {
-        id: d.id,
-        value: d.values[d.values.length - 1]}
-    })
-    .attr('transform', function (d) {
-      return 'translate(' + (xScale(d.value.date) + 10)
-            + ',' + (yScale(d.value.measurement) + 5) + ')'
-    })
-    .attr('x', 5)
-    .text(function (d) { return ('Serie ') + d.id })
-})
+});
